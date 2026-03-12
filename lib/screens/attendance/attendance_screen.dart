@@ -58,7 +58,6 @@ class _AttendanceScreenState extends State<AttendanceScreen>
       body: Column(
         children: [
           SizedBox(height: 20.h),
-
           Text(
             "Mark Attendance",
             style: TextStyle(

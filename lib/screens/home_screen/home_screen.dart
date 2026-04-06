@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:marken/helper/shared_pref/app_pref.dart';
 import 'package:marken/utils/app_colors.dart';
 import 'package:marken/utils/widget/common_app_bar.dart';
 import 'package:marken/utils/widget/common_drawer.dart';
@@ -40,31 +41,46 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
-                "Welcome to Marken",
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColor.primaryBlue,
-                ),
-              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    "Welcome to Marken",
+                    style: TextStyle(
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColor.primaryBlue,
+                    ),
+                  ),
 
-              SizedBox(height: 10.h),
+                  SizedBox(height: 10.h),
 
-              Text(
-                "Akanksha Ghotekar",
-                style: TextStyle(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
+                  FutureBuilder<String?>(
+                    future: AppPref.getName(),
+                    builder: (context, snapshot) {
+                      return Text(
+                        snapshot.data ?? "",
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      );
+                    },
+                  ),
 
-              SizedBox(height: 6.h),
+                  SizedBox(height: 6.h),
 
-              Text(
-                "Employee ID: 09",
-                style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  FutureBuilder<String?>(
+                    future: AppPref.getUserSrNo(),
+                    builder: (context, snapshot) {
+                      return Text(
+                        "Employee ID: ${snapshot.data ?? ""}",
+                        style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),

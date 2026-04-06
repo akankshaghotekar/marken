@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:marken/helper/api/api_service.dart';
+import 'package:marken/helper/model/holiday_model.dart';
 import 'package:marken/utils/app_colors.dart';
 import 'package:marken/utils/widget/common_app_bar.dart';
 import 'package:marken/utils/widget/common_drawer.dart';
@@ -14,15 +16,23 @@ class HolidayListScreen extends StatefulWidget {
 class _HolidayListScreenState extends State<HolidayListScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final List<Map<String, String>> holidays = [
-    {"date": "01-01-2026", "name": "New Year"},
-    {"date": "26-01-2026", "name": "Republic Day"},
-    {"date": "14-03-2026", "name": "Holi"},
-    {"date": "15-08-2026", "name": "Independence Day"},
-    {"date": "02-10-2026", "name": "Gandhi Jayanti"},
-    {"date": "12-11-2026", "name": "Diwali"},
-    {"date": "25-12-2026", "name": "Christmas"},
-  ];
+  List<HolidayData> holidays = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchHolidays();
+  }
+
+  Future<void> fetchHolidays() async {
+    final data = await ApiService.getHolidayList();
+
+    setState(() {
+      holidays = data;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,53 +107,56 @@ class _HolidayListScreenState extends State<HolidayListScreen> {
 
             /// Holiday List
             Expanded(
-              child: ListView.builder(
-                itemCount: holidays.length,
-                itemBuilder: (context, index) {
-                  final holiday = holidays[index];
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      itemCount: holidays.length,
+                      itemBuilder: (context, index) {
+                        final holiday = holidays[index];
 
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 8.h),
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                      horizontal: 10.w,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: AppColor.grey),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              holiday["date"]!,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w500,
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 8.h),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 12.h,
+                            horizontal: 10.w,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.r),
+                            border: Border.all(color: AppColor.grey),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    holiday.date,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                              Expanded(
+                                flex: 4,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text(
+                                    holiday.holidayTitle.replaceAll("\n", " "),
+                                    style: TextStyle(fontSize: 14.sp),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                        Expanded(
-                          flex: 4,
-                          child: Align(
-                            alignment: Alignment.centerRight,
-                            child: Text(
-                              holiday["name"]!,
-                              style: TextStyle(fontSize: 14.sp),
-                            ),
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
+            SizedBox(height: 40.h),
           ],
         ),
       ),

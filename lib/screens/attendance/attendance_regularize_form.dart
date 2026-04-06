@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:marken/helper/api/api_service.dart';
+import 'package:marken/helper/shared_pref/app_pref.dart';
 import 'package:marken/utils/app_colors.dart';
 import 'package:marken/utils/widget/common_app_bar.dart';
 
@@ -19,6 +21,9 @@ class _AttendanceRegularizeFormState extends State<AttendanceRegularizeForm> {
   final TextEditingController commentController = TextEditingController();
 
   bool isLoading = false;
+
+  String? _usersrno;
+  String? _employeesrno;
 
   final DateFormat formatter = DateFormat('dd-MM-yyyy');
 
@@ -44,27 +49,49 @@ class _AttendanceRegularizeFormState extends State<AttendanceRegularizeForm> {
   void _submit() async {
     if (!isFormValid) return;
 
+    if (_usersrno == null || _employeesrno == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("User data missing")));
+      return;
+    }
+
     setState(() => isLoading = true);
 
-    /// Fake API delay
-    await Future.delayed(const Duration(seconds: 1));
+    final res = await ApiService.addAttendanceRegularize(
+      usersrno: _usersrno!,
+      employeesrno: _employeesrno!,
+      srno: widget.srno,
+      date: formatter.format(attendanceDate!),
+      comment: commentController.text.trim(),
+    );
+
+    if (!mounted) return;
 
     setState(() => isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Attendance regularize request submitted",
-          style: TextStyle(color: AppColor.primaryBlue),
-        ),
-        backgroundColor: AppColor.iconBg,
-      ),
-    );
+    if (res['status'] == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(res['message'] ?? "Request submitted")),
+      );
 
-    Navigator.pop(context, true);
+      Navigator.pop(context, true);
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(res['message'] ?? "Failed")));
+    }
+  }
 
-    commentController.clear();
-    attendanceDate = null;
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    _usersrno = await AppPref.getUserSrNo();
+    _employeesrno = await AppPref.getEmployeeSrNo();
   }
 
   @override
@@ -147,6 +174,9 @@ class _AttendanceRegularizeFormState extends State<AttendanceRegularizeForm> {
               child: TextField(
                 controller: commentController,
                 maxLines: 4,
+                onChanged: (value) {
+                  setState(() {});
+                },
                 decoration: InputDecoration(
                   hintText: "Enter reason...",
                   border: InputBorder.none,

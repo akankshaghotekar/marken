@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:marken/helper/api/api_service.dart';
+import 'package:marken/helper/shared_pref/app_pref.dart';
 import 'package:marken/screens/home_screen/home_screen.dart';
 import 'package:marken/utils/animation_helper/animated_page_route.dart';
 import 'package:marken/utils/app_colors.dart';
@@ -39,10 +41,32 @@ class _LoginScreenState extends State<LoginScreen> {
       errorMessage = null;
     });
 
-    Navigator.pushReplacement(
-      context,
-      AnimatedPageRoute(page: const HomeScreen()),
+    final response = await ApiService.login(
+      username: username,
+      password: password,
     );
+
+    setState(() => isLoading = false);
+
+    if (response != null && response.data.isNotEmpty) {
+      final user = response.data.first;
+
+      /// SAVE LOGIN DATA
+      await AppPref.saveLogin(
+        userSrNo: user.usersrno,
+        employeeType: user.employeeType,
+        name: user.name,
+        employeeSrNo: user.employeesrno,
+      );
+
+      /// NAVIGATE
+      Navigator.pushReplacement(
+        context,
+        AnimatedPageRoute(page: const HomeScreen()),
+      );
+    } else {
+      setState(() => errorMessage = "Invalid username or password");
+    }
   }
 
   @override

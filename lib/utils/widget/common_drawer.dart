@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:marken/helper/shared_pref/app_pref.dart';
 import 'package:marken/screens/attendance/attendance_screen.dart';
 import 'package:marken/screens/holiday/holiday_list_screen.dart';
 import 'package:marken/screens/home_screen/home_screen.dart';
@@ -45,6 +46,8 @@ class CommonDrawer extends StatelessWidget {
         break;
 
       case "Logout":
+        await AppPref.logout();
+
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -104,13 +107,18 @@ class CommonDrawer extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          Text(
-                            "Akanksha Ghotekar",
-                            style: TextStyle(
-                              color: AppColor.orange,
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          FutureBuilder<String?>(
+                            future: AppPref.getName(),
+                            builder: (context, snapshot) {
+                              return Text(
+                                snapshot.data ?? "",
+                                style: TextStyle(
+                                  color: AppColor.orange,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

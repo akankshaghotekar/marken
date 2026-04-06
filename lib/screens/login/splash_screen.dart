@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:marken/helper/shared_pref/app_pref.dart';
+import 'package:marken/screens/home_screen/home_screen.dart';
 import 'package:marken/screens/login/login_screen.dart';
 import 'package:marken/utils/animation_helper/animated_page_route.dart';
 import 'dart:async';
@@ -33,13 +35,20 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    // optional navigation delay
-    Timer(const Duration(seconds: 4), () {
-      Navigator.pushReplacement(
-        context,
-        AnimatedPageRoute(page: const LoginScreen()),
-      );
-    });
+    _checkLogin();
+  }
+
+  Future<void> _checkLogin() async {
+    await Future.delayed(const Duration(seconds: 4));
+
+    bool isLoggedIn = await AppPref.isLoggedIn();
+
+    Navigator.pushReplacement(
+      context,
+      AnimatedPageRoute(
+        page: isLoggedIn ? const HomeScreen() : const LoginScreen(),
+      ),
+    );
   }
 
   @override
